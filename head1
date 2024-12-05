@@ -1,0 +1,75 @@
+#!/bin/bash
+
+server_name=$(hostname)
+
+function message_text() {
+    echo ""
+    echo "Введите ip пк:"
+    echo -n
+    read MESSAGE_T
+    echo "Введите сообщение для отправки:"
+    echo -n
+    read MESSAGE
+	echo ""
+}
+
+function range_check() {
+    echo ""
+    cat /home/user/kva-kva/scripts/notifi_bash/pul_1
+    echo ""
+    echo ""
+}
+
+function range_push() {
+    echo ""
+    /bin/bash /home/user/kva-kva/scripts/notifi_bash/body.sh
+    echo ""
+    echo ""
+}
+
+green='\e[32m'
+blue='\e[34m'
+clear='\e[0m'
+
+ColorGreen(){
+	echo -ne $green$1$clear
+}
+ColorBlue(){
+	echo -ne $blue$1$clear
+}
+
+menu(){
+echo -ne "
+$(ColorGreen '1)') "Сообщение на 1 пк"
+$(ColorGreen '1)') "Выберите доступный диапазон"
+$(ColorGreen '2)') "Проверка текущего диапазона"
+$(ColorGreen '3)') "Запуск по пулу адресов"
+$(ColorGreen '0)') Exit
+$(ColorBlue 'Choose an option:') "
+        read a
+        case $a in
+        	1) message_text ; send_message ;;
+	        2) ip_imput ; menu ;;
+	        3) range_check ; menu ;;
+	        4) range_push ; menu ;;
+		0) exit 0 ;;
+		*) echo -e $red"Wrong option."$clear; WrongCommand;;
+        esac
+}
+
+function send_message() {
+    local KEY_PATH="/home/user/key/medkey"
+
+    echo "Отправка скрипта на сервер..."
+    ssh -i "$KEY_PATH" root@"$MESSAGE_T" bash -c "cat << 'EOF' > /tmp/message_display.sh
+	#!/bin/bash
+	xhost +
+	export DISPLAY=:0 && zenity --info --text="$MESSAGE"
+	xhost -"
+
+    echo "Выполнение скрипта на сервере..."
+    ssh -i "$KEY_PATH" root@"$MESSAGE_T" "/bin/bash /tmp/message_display.sh >/dev/null &" 
+
+}
+
+menu
